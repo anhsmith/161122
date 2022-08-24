@@ -827,5 +827,5 @@ visreg(c3_int_log, "Age", by="Treatment", trans=exp,
 
 - Interaction between a numerical variable and a factor
 
-- Next time: interaction between two numerical variables
+- Not covered: interaction between two numerical variables
 
