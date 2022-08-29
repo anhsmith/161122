@@ -170,7 +170,7 @@ housing <- read_rnzb("data/hm10.xlsx")
 housing %>% 
   ggplot() + aes(x=date,y=total_value_of_housing_stock) + 
   geom_point() + geom_line() +
-  xlab('Time') + ylab('Total Value of Housing Stock') + 
+  xlab('Time') + ylab('Total value of NZ housing stock') + 
   ggtitle('Is the housing market always prospering?') +
   scale_y_continuous(labels = scales::dollar_format(prefix="$", scale=1/1e6, suffix = "T", accuracy=.5))
 ```
@@ -457,7 +457,7 @@ gh1 <- housing %>%
   aes(x=date,y=total_value_of_housing_stock) + 
   geom_hline(yintercept=0) + 
   geom_point() + geom_line() +
-  xlab('Time') + ylab('Total Value of Housing Stock') +
+  xlab('Time') + ylab('Total calue of NZ housing stock') +
   scale_y_continuous(labels = scales::dollar_format(prefix="$", scale=1/1e6, suffix = "T",accuracy=.5),
                      limits = c(-120000,1800000) )
 
@@ -661,8 +661,8 @@ gh1 +
   geom_line(data = augment(hpi.qm, housing.ts),
             aes(y=.resid), col=6, lwd=1) +
   annotate(geom="text", x = housing$date[7], y = 270000, label="Quadratic fit", col=4) +
-  annotate(geom="text", x = housing$date[70], y = 220000, label="Residuals", col=6) +
-  xlab('Time') + ylab('Total Value of Housing Stock') 
+  annotate(geom="text", x = housing$date[70], y = 220000, label="Residuals", col=6)
+
 ```
 
 
