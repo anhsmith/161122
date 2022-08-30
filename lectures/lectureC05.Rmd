@@ -3,7 +3,7 @@ title: "Lecture C5"
 subtitle: "Linear models with multiple predictors and factors"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css"]
+    css: [default, default-fonts, "custom.css", "adam.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -121,7 +121,11 @@ What are the potential advantages of this?
 
 --
 
-A model that uses all variables *may* lead to more better and more precise estimates, with narrower confidence and prediction intervals. However, we must be careful because a more complex model might make worse predictions than a simpler model, and it's not always obvious!
+A model that uses all variables *may* lead to more better and more precise estimates, with narrower confidence and prediction intervals. 
+
+--
+
+However, we must be careful because a more complex model might make worse predictions than a simpler model, and it's not always obvious when this is the case!
 
 ---
 
@@ -179,7 +183,7 @@ lm(Bodywt ~ Heartgirth, donkey) %>%
 
 Plug in the coefficients:    
 
-$\mathsf{Mean(Bodywt)} =-194.49 + 2.83 \mathsf{Heartgirth}$
+$\mathsf{Mean(Bodywt)} =-194.49 + \color{red}{2.83} \mathsf{Heartgirth}$
 ]]
 
 --
@@ -198,7 +202,7 @@ lm(Bodywt ~ Heartgirth + Umbgirth, donkey) %>%
 
 Plug in the coefficients:
 
-$$\mathsf{Mean(Bodywt)} =-194.49 + 2.38\mathsf{Heartgirth} + 0.42 \mathsf{Umbgirth}$$
+$$\mathsf{Mean(Bodywt)} =-194.49 + \color{red}{2.39}\mathsf{Heartgirth} + 0.42 \mathsf{Umbgirth}$$
 ]]
 
 --
@@ -610,6 +614,30 @@ $$z = \left\{
 
 --
 
+```{r}
+tibble(y = rnorm(6), 
+       x = c("A","A","A","B","B","B")) %>% 
+  mutate(z = ifelse(x=="B",1,0))
+```
+
+
+---
+
+## Factors with two levels
+
+
+
+Consider a factor with two levels, say, $\mathsf{A}$ and $\mathsf{B}$. We have some $y$ values from group $\mathsf{A}$ and some $y$ values from group $\mathsf{B}$. We want to estimate the mean of $y$ for each group, $\mu_\mathsf{A}$ and $\mu_\mathsf{A}$, and test whether these means are different.
+
+We can codify a factor with two levels using an '*indicator*' (or '*dummy*') variable $z$, where
+$$z = \left\{
+\begin{array}{ll}
+0 & \textrm{for observations in level } \mathsf{A}\\
+1 & \textrm{for observations in level } \mathsf{B}
+\end{array}\right.$$
+
+--
+
 $z$ is then used as a predictor in a linear model for the mean $\ \mu = \alpha + \beta z$
 
 --
@@ -820,6 +848,7 @@ The high p-value means we failed to reject the null hypothesis ( $\mathsf{H_0}: 
 
 ]
 
+
 ---
 
 ## What about factors with three levels?
@@ -830,6 +859,40 @@ For two levels, we introduced an indicator variable $z$ that was `1` for level `
 
 --
 
+For three levels, $\mathsf{A}$, $\mathsf{B}$, and $\mathsf{C}$, we need two indicator variables:
+
+
+$$\begin{align}
+z_2 = \left\{
+\begin{array}{ll}
+1 & \textrm{for observations in level } \mathsf{B}\\
+0 & \textrm{otherwise}
+\end{array}\right.
+&&
+z_3 = \left\{
+\begin{array}{ll}
+1 & \textrm{for observations in level } \mathsf{C}\\
+0 & \textrm{otherwise}
+\end{array}\right.
+\end{align}$$
+
+
+--
+.small[
+```{r}
+tibble(y = rnorm(9), 
+       x = c("A","A","A","B","B","B","C","C","C")) %>% 
+  mutate(z2 = ifelse(x=="B",1,0),
+         z3 = ifelse(x=="C",1,0))
+```
+]
+
+---
+
+## What about factors with three levels?
+
+
+For two levels, we introduced an indicator variable $z$ that was `1` for level `B` and `0` otherwise. 
 For three levels, $\mathsf{A}$, $\mathsf{B}$, and $\mathsf{C}$, we need two indicator variables:
 
 

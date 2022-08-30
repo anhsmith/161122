@@ -3,7 +3,7 @@ title: "Lecture C2"
 subtitle: "Testing hypotheses and making predictions with linear models"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css"]
+    css: [default, default-fonts, "custom.css", "adam.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -20,6 +20,7 @@ editor_options:
 ---
 
 ```{r setup, echo=FALSE}
+library(broom)
 library(knitr)
 library(ggplot2); theme_set(theme_bw(base_size=15))
 library(patchwork)
@@ -54,6 +55,7 @@ class: middle, inverse
 
 ## Interpreting R output and making inferences
 
+
 ---
 
 ## Summary of a linear model in R
@@ -63,7 +65,15 @@ donkey <- read.csv("http://www.massey.ac.nz/~jcmarsha/227215/data/donkey.csv")
 mod <- lm(Bodywt ~ Heartgirth, data=donkey); summary(mod)
 ```
 
---
+---
+
+## Summary of a linear model in R
+
+```{r, comment="", highlight.output=10:12}
+donkey <- read.csv("http://www.massey.ac.nz/~jcmarsha/227215/data/donkey.csv")
+mod <- lm(Bodywt ~ Heartgirth, data=donkey); summary(mod)
+```
+
 
 `r fa("atom") ` **First, let's discuss the `Coefficients` table.**
 
@@ -215,31 +225,32 @@ The `t value` and `Pr(>|t|)` values relate to testing the **null hypothesis that
 
 --
 
-When testing the null hypothesis that the coefficient for `Heartgirth` is 0, we are essentially asking "*how plausible would our estimate of `r round(s[2,1],2)` be if the true coefficient is zero?*". In other words, "*could our result just be due to sampling error?*". 
+- When testing the null hypothesis that the coefficient for `Heartgirth` is 0, we are essentially asking "*how plausible would our estimate of `r round(s[2,1],2)` be if the true coefficient is zero?*". In other words, "*could our result just be due to sampling error?*". 
 
 --
 
-The test statistic '`t value`' is simply `Estimate/Std. Error`. It compares each estimate to its sampling error.
+- The test statistic '`t value`' is simply `Estimate/Std. Error`. It compares each estimate to its sampling error.
 
 --
 
-The '`Pr(>|t|)`' is the 'P-value', which determines the result of our hypothesis test. The P-value for `Heartgirth` is tiny. This means that, if there was no relationship between the body weight and heart girth of donkeys, there would be negligible chance of observing an estimate as large or larger than `r round(s[2,1],2)`. 
+- The '`Pr(>|t|)`' is the 'P-value', which determines the result of our hypothesis test. The P-value for `Heartgirth` is tiny. This means that, if there was no relationship between the body weight and heart girth of donkeys, there would be negligible chance of observing an estimate as large or larger than `r round(s[2,1],2)`. 
 
 --
 
-Thus, our conclusion is that we reject the null hypothesis that $\beta=0$ and conclude that body weight does indeed increase with heart girth.
+- Thus, our conclusion is that we reject the null hypothesis that $\beta=0$ and conclude that body weight does indeed increase with heart girth.
 
 
 ---
 
 ## Summary of a linear model in R
 
-```{r, comment=""}
+```{r, comment="", highlight.output=14}
 donkey <- read.csv("http://www.massey.ac.nz/~jcmarsha/227215/data/donkey.csv")
 mod <- lm(Bodywt ~ Heartgirth, data=donkey); summary(mod)
 ```
 
-`r fa("atom") ` **Now, we'll look at the bottom part of the summary output. First, what are '`Signif. codes`'?**
+
+`r fa("atom") ` **Next, we'll look at the bottom part of the summary output. First, what are '`Signif. codes`'?**
 
 ---
 
@@ -266,7 +277,7 @@ A large P-value means no evidence against the null hypothesis (**not** evidence 
 
 ## Summary of a linear model in R
 
-```{r, comment=""}
+```{r, comment="", highlight.output = 16:18}
 donkey <- read.csv("http://www.massey.ac.nz/~jcmarsha/227215/data/donkey.csv")
 mod <- lm(Bodywt ~ Heartgirth, data=donkey); summary(mod)
 ```
@@ -330,24 +341,33 @@ We will discuss `Adjusted R-squared` in Lecture C6 - multiple linear regression,
 
 ## For our model of donkey body weights, the $R^2$ is 0.80
 
-```{r echo=FALSE, fig.align="center", fig.height=5, fig.width=8}
-l <- lm(Bodywt ~ Heartgirth, data=donkey)
-ab <- coef(l)
-p <- as.data.frame(predict(l, newdata=data.frame(Heartgirth=70:150), interval='prediction'))
-ggplot(donkey, aes(x=Heartgirth, y=Bodywt)) + geom_point(col=col_points) +
-  geom_abline(intercept=ab[1], slope=ab[2]) + ylab("Response (Body weight in kg)") +
+```{r echo=FALSE, fig.align="center", fig.height=5, fig.width=8, message=FALSE}
+model_wt_hg <- lm(Bodywt ~ Heartgirth, data=donkey)
+ab <- coef(model_wt_hg)
+p <- augment(model_wt_hg, interval='prediction')
+
+ggplot(p, aes(x=Heartgirth, y=Bodywt)) +
+  ylab("Response variable (Body weight in kg)") +
   xlab("Explanatory variable (Heart girth in cm)") +
-#  annotate('segment', x=91, y = ab[1] + ab[2]*90, xend = 135, yend = ab[1] + ab[2]*90, arrow=arrow(angle=20, type='closed', ends = 'both', length=unit(0.15, 'inches'))) +
-#  annotate('text', x=(91+135)/2, y=ab[1] + ab[2]*90, label="Variation in heart girth", vjust=-0.3) +
-  annotate('segment', x=90, y = ab[1] + ab[2]*90, xend = 136, yend = ab[1] + ab[2]*136, arrow=arrow(angle=20, type='closed', ends = 'both', length=unit(0.15, 'inches')), size=1) +
-  annotate('text', x=120, y=80, label=expression(atop("Variation in "* bold(mean)*" body weight", "explained by heart girth: 80%")), hjust=0, parse=TRUE) +
-  annotate('curve', x=120, y=80, curvature = -0.2, xend = 110, yend = ab[1] + ab[2]*110-2, arrow=arrow(angle=20, type='closed', length=unit(0.15, 'inches'))) +
-  annotate('line', x=70:150, y = p[,2], linetype = 'dotted') +
-  annotate('line', x=70:150, y = p[,3], linetype = 'dotted') +
-  annotate('text', x=95, y=160, label = expression(atop("Variation in body weight", "unexplained: 20%")), hjust=1) +
-  annotate('curve', x=95, y=160, curvature = -0.2, xend = 110, yend = ab[1] + ab[2]*110 + 20, arrow=arrow(angle=20, type='closed', length=unit(0.15, 'inches'))) +
-  scale_x_continuous(limits=c(77,143), expand=c(0,0)) +
-  scale_y_continuous(limits=c(42,230), expand=c(0,0))
+  xlim(79,140) +
+  ylim(0,229) +
+  geom_smooth(method="lm", fill = 4) +
+  geom_point(alpha=.7) +
+  annotate('text', x=95, y=140, 
+           label = expression("Unexplained residual variation\nin body weight: ~ 20%"), hjust=1) +
+  geom_ribbon(aes(ymin=.lower, ymax=.upper), alpha=.2) + 
+  annotate('curve', x=95, y=160, curvature = -0.2, 
+           xend = 110, yend = ab[1] + ab[2]*110 + 20,
+           arrow=arrow(angle=20, type='closed', 
+                       length=unit(0.15, 'inches'))) + 
+  annotate('text', x=121, y=70, 
+           label= expression(atop("Variation in "* bold(mean)*" body weight", 
+                                  "explained by model: ~ 80%")), 
+           hjust=0) +
+  annotate('curve', x=120, y=80, curvature = -0.2, 
+           xend = 110, yend = ab[1] + ab[2]*110-2,
+           arrow=arrow(angle=20, type='closed', 
+                       length=unit(0.15, 'inches')))
 ```
 
 ---
@@ -464,14 +484,19 @@ set.seed(2015)
 x <- rnorm(100, 3, 1)
 y <- 0.5 + 0.5*x + rnorm(100, 0, 0.3)
 line <- lm(y ~ x) 
-plot(y ~ x, col="#00000050", xlim=c(min(x)-0.25, max(x)+0.25), ylim=c(min(x)-0.25, max(y)+0.25), pch=19, xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", yaxs="i")
+plot(y ~ x, col=alpha(1, .8), xlim=c(min(x)-0.25, max(x)+0.25), ylim=c(min(x)-0.25, max(y)+0.25),
+     pch=19, xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", yaxs="i")
 xv <- seq(0,6,0.01)
 yv_c <- predict(line, data.frame(x=xv), interval="confidence")
 yv_p <- predict(line, data.frame(x=xv), interval="prediction")
-polygon(c(xv,rev(xv)),c(yv_p[,2], rev(yv_p[,3])), col="#00000020", border=NA)
-polygon(c(xv,rev(xv)),c(yv_c[,2], rev(yv_c[,3])), col="#00000040", border=NA)
-abline(coef(line), lwd=2)
-legend("bottomright", fill=c("#00000060", "#00000020"), legend=c("Confidence interval", "Prediction interval"), bty="n")
+polygon(c(xv,rev(xv)),c(yv_p[,2], rev(yv_p[,3])), col=alpha(1, .3), border=NA)
+polygon(c(xv,rev(xv)),c(yv_c[,2], rev(yv_c[,3])), col=alpha(1, .3), border=NA)
+abline(coef(line), lwd=3, col = 4)
+legend("bottomright", border = NA, 
+       lty=c(1,1,1),
+       # fill=c(NA, alpha(1, .6), alpha(1, .3)), 
+       col=c(4, alpha(1, .6), alpha(1, .3)), lwd=c(3,20,20), 
+       legend=c("Regression line", "Confidence interval", "Prediction interval"), bty="n")
 ```
 
 ---
@@ -563,14 +588,14 @@ summary(mod)
 
 ---
 
-## Comparing two models via graphs
+## Comparing two models via plots
 
 The graphical approach could always be your first choice, though the difference is not very clear here. 
 
-```{r, echo=FALSE, fig.align="center", fig.width=10, fig.height=5}
+```{r, echo=FALSE, fig.align="center", fig.dim=c(10,4), out.width="100%"}
 library(visreg)
-g1 <- visreg(mod,partial=TRUE,gg=TRUE)
-g2 <- visreg(mod2,trans=exp,partial=TRUE,gg=TRUE)
+g1 <- visreg(mod,partial=TRUE,gg=TRUE) + ggtitle('lm(Bodywt ~ Heartgirth)') + theme(plot.title    = element_text(family = "mono", size = 14))
+g2 <- visreg(mod2,trans=exp,partial=TRUE,gg=TRUE) + ggtitle('lm(log(Bodywt) ~ log(Heartgirth))') + theme(plot.title = element_text(family = "mono", size = 14)) + ylab("Bodywt")
 g1 + g2
 ```
 

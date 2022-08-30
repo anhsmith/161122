@@ -3,7 +3,7 @@ title: "Lecture C4"
 subtitle: " Residual diagnostics and transformations"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css"]
+    css: [default, default-fonts, "custom.css", "adam.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -296,23 +296,30 @@ You may choose to remove outliers, but it must be reported and justified in your
 
 Be careful though! The outliers may be very informative, perhaps even lead us to new scientific discoveries!
 
-.center[
-'*Scientific measurements are never perfect, but different teams studying the same phenomena can often produce widely different results. These “outlier” values are the cause of much consternation – but they may also be a sign of healthy scientific progress*'
-]
+> '*Scientific measurements are never perfect, but different teams studying the same phenomena can often produce widely different results. These “outlier” values are the cause of much consternation – but they may also be a sign of healthy scientific progress*'
+
 Bailey, David (2018) “Why OUTLIERS are good for science”, *Significance*, 15(1): 14-19. https://rss.onlinelibrary.wiley.com/doi/full/10.1111/j.1740-9713.2018.01105.x
 
 ---
 
 ## Donkeys: Residuals *vs* fitted values
 
-```{r, fig.align='center', fig.width=6, fig.height=4, out.height="70%", echo=FALSE}
-par(mar=c(2,2,2,2))
+.left-plot[
+
+```{r, echo=FALSE, out.width="100%"}
 plot(mod, which=1, pch=19, col="#00000040")
 ```
+]
+
+--
+
+.right-code[ 
 
 Linearity doesn't hold. There is a curve.
 
-Equal variance doesn't hold. There is fanning in the residuals.
+Equal variance doesn't hold. The residuals are increasingly spread out to the right of the plot.
+
+]
 
 ---
 
@@ -351,16 +358,11 @@ Linearity and equal variance now hold.
 
 ## What have we done?
 
-- We transformed the data and then fit a straight line.
+- We transformed both $x$ and $y$ and then fit a straight line.
 
 - This is the same as fitting a curve to the original data (a power curve).
 
-- We can visualise that using `visreg`. 
-
-```{r, echo=TRUE, eval=FALSE}
-library(visreg)
-visreg(mod2)
-```
+- We can visualise the model using the `visreg` package. 
 
 ---
 
@@ -388,15 +390,16 @@ We have seen the power of log transformation which provides us an efficient reme
 
 Notice that we take the log transformation for both `Bodywt` ( $y$ ) and `Heartgirth` ( $x$ ). After a log transformation, the linear model becomes
 $$
-\log(y) = \alpha + \beta \log(x) +\varepsilon.
+\log(y) = \alpha + \beta \log(x) +\varepsilon
 $$
 
 Exponentiating both sides leads to 
 $$
-y=e^\alpha\cdot x^\beta \cdot e^\varepsilon.
+y=e^\alpha\cdot x^\beta \cdot e^\varepsilon
 $$
 
-which implies a power law between `Bodywt` and `Heartgirth` with a multiplicative error term $e^\varepsilon$. $e^\varepsilon$ follows a log-normal distribution. 
+which implies a power law between `Bodywt` and `Heartgirth` with a multiplicative error term $e^\varepsilon$.      
+$e^\varepsilon$ follows a log-normal distribution. 
 
 ---
 
@@ -404,19 +407,19 @@ which implies a power law between `Bodywt` and `Heartgirth` with a multiplicativ
 
 --
 
-The exponential function serves as the inverse transformation for the log function.
+The exponential function is the inverse of the log function. $e^{log(x)} = x$
 
 --
 
-Sometimes, we only need to take $\log(x)$ or $\log(y)$ as
+Sometimes, we take the log of only $x$ 
 
-$$
-y = \alpha + \beta \log(x) +\varepsilon \text{    and    } \log(y) = \alpha + \beta x + \varepsilon
-$$
+$$y = \alpha + \beta \log(x) +\varepsilon$$
+or only $y$
+$$\log(y) = \alpha + \beta x + \varepsilon$$
 
 --
 
-These two imply a log or exponential law between $y$ and $x$. 
+They both imply a log or exponential law between $y$ and $x$. 
 
 --
 
@@ -435,10 +438,14 @@ The log transformation is powerful, but it is not a panacea!
 Box and Cox proposed the following famous transformation named after their last names
 
 $$
-y^{(\lambda )}={\begin{cases}{\dfrac {y^{\lambda }-1}{\lambda }}&{\text{if }}\lambda \neq 0,\\\ln y&{\text{if }}\lambda =0,\end{cases}}
+y^{(\lambda )} = 
+\begin{cases}
+{\dfrac {y^{\lambda }-1}{\lambda }} & {\text{if }\lambda \neq 0} \newline
+{\log(y)} & {{\text{if }}\lambda =0}
+\end{cases}
 $$
 
-A bit calculus shows that ${(y^{\lambda}-1)}/{\lambda}\to \log(y)$ if $\lambda\to 0$.
+A bit calculus shows that ${(y^{\lambda}-1)}/{\lambda}\to \log(y)$ as $\lambda\to 0$.
 
 A Box-Cox transformation is a way to transform non-normal variables into a normal shape. 
 
@@ -484,7 +491,7 @@ The middle dash line specifies the best possible value for $\lambda$ while any v
 
 So we can pick $\lambda=0$, i.e. a log transformation on $y$, for a neat expression.
 
--- 
+--
 
 **Task**: Box-coxing different candidate models with the following codes
 ```{r, echo=TRUE, eval=FALSE}
@@ -506,9 +513,9 @@ Specify a neat expression for your model from each box-cox plot.
 
   - Next look at residuals vs leverage. If you have influential outliers then look at the effect of removing those observations.
 
-- Transformation
+- Transformations
     
-  - The versatility of the log transformation.
+  - log
     
-  - Use the Box-Cox transformation.
+  - Box-Cox
   

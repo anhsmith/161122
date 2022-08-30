@@ -3,7 +3,7 @@ title: "Lecture C3"
 subtitle: "A minimal theory of linear models"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css"]
+    css: [default, default-fonts, "custom.css", "adam.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -215,19 +215,29 @@ In previous lectures we sometimes used $a$ and $b$ to talk about $\hat{\alpha}$ 
 
 ## A toy example
 
-Let's consider a even simpler model: $\mathsf{mean}[y]=\beta x$. The intercept $\alpha$ is set as zero. We only need to estimate $\beta$.
+--
+
+Let's consider a even simpler model: $\mathsf{mean}[y]=\beta x$. The intercept $\alpha$ is set as zero. We only need to estimate $\beta.$
+
+--
 
 We observed two pairs of observations $(x_1,y_1)=(4,5)$ and $(x_2,y_2)=(6,3)$.
+
+--
 
 Then,
 
 $$\mathsf{Var}_\mathsf{res}(\tilde\beta)=[(y_1-\tilde\beta x_1)^2+(y_2-\tilde\beta x_2)^2]/2$$
- 
+
+--
+
 After some simplifications, we have 
  
 $$\mathsf{Var}_\mathsf{res}(\tilde\beta)=a\tilde\beta^2+b\tilde\beta+c$$
 
 where $a=(x_1^2+x_2^2)/2=26,b=-(x_1y_1+x_2y_2)=-38,c=(y_1^2+y_2^2)/2=17$.
+
+--
 
 This leads to $\mathsf{Var}_\mathsf{res}(\tilde\beta)=26\tilde\beta^2-38\tilde\beta+17$, a quadratic function of $\tilde\beta$. Let's plot the residual variance against possible values of $\tilde\beta$...
 

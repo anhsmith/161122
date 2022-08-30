@@ -3,7 +3,7 @@ title: "Lecture C1"
 subtitle: "Simple Linear Regression"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css"]
+    css: [default, default-fonts, "custom.css", "adam.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -20,6 +20,7 @@ editor_options:
 ---
 
 ```{r setup, echo=FALSE}
+library(broom)
 library(knitr)
 library(ggplot2); theme_set(theme_bw(base_size=15))
 library(patchwork)
@@ -49,15 +50,15 @@ class: middle, inverse
 
 ## Two centuries of history 
 
- - The earliest regression was fit using the method of least squares, which was published by Legendre in 1805 and by Gauss in 1809. Both applied the method to the problem of determining the orbits of bodies about the sun from astronomical observations.
+The earliest regression was fit using the method of least squares, which was published by Legendre in 1805 and by Gauss in 1809. Both applied the method to the problem of determining the orbits of bodies about the sun from astronomical observations.
 
- - The term "regression" was coined by Francis Galton in the nineteenth century to describe a biological phenomenon - regression toward the mean. 
- 
- - The phenomenon was that the heights of descendants of tall ancestors tend to regress down towards a normal average.
- 
- - Galton's work on regression had only this biological meaning and it was later extended by Udny Yule and Karl Pearson to more general statistical contexts.
+The term "regression" was coined by Francis Galton in the nineteenth century to describe a biological phenomenon - regression toward the mean. 
 
- - Great mathematicians and statisticians spent almost two hundreds years to build the whole framework for linear regression. We will learn it in two weeks!
+The phenomenon was that the heights of descendants of tall ancestors tend to regress down towards a normal average.
+ 
+Galton's work on regression had only this biological meaning and it was later extended by Udny Yule and Karl Pearson to more general statistical contexts.
+
+Great mathematicians and statisticians spent almost two hundreds years to build the whole framework for linear regression. We will learn it in two weeks!
 
 ---
 
@@ -95,11 +96,11 @@ g1 + g2 + g3 + g4 + g5 + plot_layout(nrow=1)
 
 --
 
-- Which variables are most strongly related to body weight?
+Which variables are most strongly related to body weight?
 
 --
 
-- Let's build a model of body weight based on its linear relationship with heart girth.
+Let's build a model of body weight based on its linear relationship with heart girth.
 
 ---
 
@@ -111,15 +112,25 @@ class: middle, inverse
 
 ## Simple linear regression 
 
+--
+
 Simple linear regression is a simplest form of a linear model.
+
+--
 
 The variable of interest, $y$, is called the "response variable". 
 
+--
+
 If $y$ has a straight-line (i.e., "linear") relationship with another variable, $x$, we can capture this relationship with a regression model. 
+
+--
 
 More specifically, we model the *mean of* $y$ as a linear function of $x$. 
 
 $$ \mathsf{Mean}[y] = \alpha + \beta x $$
+--
+
 Regression is primarily used for:
 - predicting the value of $y$ for a given value of $x$, and 
 - quantifying the strength of $y$'s association with $x$.
@@ -127,39 +138,38 @@ Regression is primarily used for:
 ---
 
 
-## Simple linear regression
+## Simple linear regression - donkeys
 
 For example, $y$ can be the body weight and $x$ the heart girth of donkeys. 
 
 Our model is: *Mean body weight* $= \alpha + \beta \times$*heart girth*
 
-```{r echo=FALSE, fig.width=8, fig.height=6, out.width="65%"}
+```{r echo=FALSE, fig.width=8, fig.height=6, message = FALSE, out.width="65%"}
 model_wt_hg <- lm(Bodywt ~ Heartgirth, data=donkey)
 ab <- coef(model_wt_hg)
-p <- predict(model_wt_hg,
-          newdata=data.frame(Heartgirth=70:150),
-          interval='prediction')
-g1 <- ggplot(donkey, aes(x=Heartgirth, y=Bodywt)) +
-  geom_point(col=col_points) +
+p <- augment(model_wt_hg, interval='prediction')
+
+g1 <- ggplot(p, aes(x=Heartgirth, y=Bodywt)) +
   ylab("Response variable (Body weight in kg)") +
   xlab("Explanatory variable (Heart girth in cm)") +
   xlim(79,140) +
-  ylim(40,229)
-g1
+  ylim(0,229)
+g1 + geom_point(col=col_points)
 ```
 
 ---
 
-## Simple linear regression
+## Simple linear regression - donkeys
 
 
 For example, $y$ can be the body weight and $x$ the heart girth of donkeys. 
 
 Our model is: *Mean body weight* $= \alpha + \beta \times$*heart girth*
 
-```{r echo=FALSE,  fig.width=8, fig.height=6, out.width="65%"}
+```{r echo=FALSE,  fig.width=8, fig.height=6, message = FALSE, out.width="65%"}
 g2 <- g1 + 
-  geom_abline(intercept=ab[1], slope=ab[2]) + 
+  geom_smooth(method="lm", fill = 4) +
+  geom_point(col=col_points) + 
   annotate('text', x=121, y=70, label= 
              expression("Predicted mean body\nweight given heart girth"), 
            hjust=0) +
@@ -172,22 +182,23 @@ g2
 
 ---
 
-## Simple linear regression
+## Simple linear regression - donkeys
 
 For example, $y$ can be the body weight and $x$ the heart girth of donkeys. 
 
 Our model is: *Mean body weight* $= \alpha + \beta \times$*heart girth*
 
-```{r echo=FALSE, fig.width=8, fig.height=6, out.width="65%"}
+```{r echo=FALSE, fig.width=8, fig.height=6, out.width="65%", message = FALSE}
 g3 <- g2 +
-  annotate('line', x=70:150, y = p[,2], col = "grey") +
-  annotate('line', x=70:150, y = p[,3], col = "grey") +
-  # geom_smooth(method="lm", se=T, level= col = "black") + 
+  geom_smooth(method="lm", fill = 4) +
+  geom_point(col=col_points) +
   annotate('text', x=95, y=140, label = expression("Variation in body weights\naround predicted mean,\nor 'residual error'"), hjust=1) +
+  geom_ribbon(aes(ymin=.lower, ymax=.upper), alpha=.2) + 
+  geom_point(col=col_points) +
   annotate('curve', x=95, y=160, curvature = -0.2, 
            xend = 110, yend = ab[1] + ab[2]*110 + 20,
            arrow=arrow(angle=20, type='closed', 
-                       length=unit(0.15, 'inches'))) 
+                       length=unit(0.15, 'inches')))
 g3
 ```
 
@@ -224,14 +235,65 @@ line <- lm(y ~ x)
   
 simple_plot <- function(x,y) {
   par(mar=c(2,2,1,1), cex=1.5)
-  plot(y ~ x, col=col_points, xlim=c(0, max(x)+0.2), ylim=c(0, max(y)+0.2), 
+  plot(y ~ x, col=1, xlim=c(0, max(x)+0.2), ylim=c(0, max(y)+0.2), 
        pch=19, xlab="", ylab="", xaxt="n", yaxt="n", xaxs="i", yaxs="i")
   line <- lm(y ~ x) 
-  abline(line, lwd=2)
+  abline(line, lwd=2, col=4)
   axis(1, line=0)
 }
 
 simple_plot(x,y)
+text(4, 2.65, expression(y==alpha+beta*x))
+```
+
+---
+
+## Recap and definitions
+
+```{r echo=FALSE, fig.align="center", fig.dim=c(8,5), out.width="70%"}
+simple_plot(x,y)
+abline(h=coef(line)[1])
+text(4, 2.65, expression(y==alpha+beta*x))
+xv <- c(1,4)
+yv <- predict(line, data.frame(x=xv))
+mtext(expression(alpha), side=2, line=0.5, at = coef(line)[1], las=1, cex=1.5)
+```
+
+---
+
+## Recap and definitions
+
+```{r echo=FALSE, fig.align="center", fig.dim=c(8,5), out.width="70%"}
+simple_plot(x,y)
+abline(h=coef(line)[1])
+text(4, 2.65, expression(y==alpha+beta*x))
+xv <- c(1,4)
+yv <- predict(line, data.frame(x=xv))
+lines(xv, rep(yv[1], 2), lty="dotted")
+lines(rep(xv[2], 2), yv, lty="dotted")
+text(mean(xv), yv[1], "run", adj=c(0.5,1.2), col="grey30")
+text(xv[2], mean(yv), "rise", adj=c(-0.2,0.5), col="grey30")
+mtext(expression(alpha), side=2, line=0.5, at = coef(line)[1], las=1, cex=1.5)
+text(4.32, yv[1]+0.2, expression(beta==over(rise,run)))
+```
+
+---
+
+## Recap and definitions
+
+```{r echo=FALSE, fig.align="center", fig.dim=c(8,5), out.width="70%"}
+simple_plot(x,y)
+abline(h=coef(line)[1])
+text(4, 2.65, expression(y==alpha+beta*x))
+text(4.32, yv[1]+0.2, expression(beta==over(rise,run)))
+mtext(expression(alpha), side=2, line=0.5, at = coef(line)[1], las=1, cex=1.5)
+xv <- c(1,4)
+yf <- function(x) predict(line, data.frame(x=x))
+
+lines(x=0:1, yf(c(0,0)), col="grey30")
+lines(x=c(1,1), yf(c(0,1)))
+text(.5, yf(.5), "1", adj=c(0.5,3), col="grey30")
+text(1.1, yf(.5), expression(beta))
 
 ```
 
@@ -241,16 +303,61 @@ simple_plot(x,y)
 
 ```{r echo=FALSE, fig.align="center", fig.dim=c(8,5), out.width="70%"}
 simple_plot(x,y)
-xv <- c(1,4)
-yv <- predict(line, data.frame(x=xv))
-lines(xv, rep(yv[1], 2), lty="dotted")
-lines(rep(xv[2], 2), yv, lty="dotted")
-text(mean(xv), yv[1], "run", adj=c(0.5,1.2), col="grey30")
-text(xv[2], mean(yv), "rise", adj=c(-0.2,0.5), col="grey30")
+abline(h=coef(line)[1])
+text(4, 2.65, expression(y==alpha+beta*x))
+text(4.32, yv[1]+0.2, expression(beta==over(rise,run)))
 mtext(expression(alpha), side=2, line=0.5, at = coef(line)[1], las=1, cex=1.5)
-text(3.8, yv[1]-0.5, expression(beta==over(rise,run)))
+xv <- c(1,4)
+yf <- function(x) predict(line, data.frame(x=x))
+
+lines(x=0:1, yf(c(0,0)), col="grey30" )
+lines(x=c(1,1), yf(c(0,1)))
+text(.5, yf(.5), "1", adj=c(0.5,3), col="grey30")
+text(1.1, yf(.5), expression(beta))
+
+lines(x=1:2, yf(c(1,1)), col="grey30" )
+lines(x=c(2,2), yf(1:2))
+text(1.5, yf(1.5), "1", adj=c(0.5,3), col="grey30")
+text(2.1, yf(1.5), expression(beta))
 
 ```
+
+
+
+---
+
+## Recap and definitions
+
+```{r echo=FALSE, fig.align="center", fig.dim=c(8,5), out.width="70%"}
+simple_plot(x,y)
+abline(h=coef(line)[1])
+text(4, 2.65, expression(y==alpha+beta*x))
+text(4.32, yv[1]+0.2, expression(beta==over(rise,run)))
+mtext(expression(alpha), side=2, line=0.5, at = coef(line)[1], las=1, cex=1.5)
+xv <- c(1,4)
+yf <- function(x) predict(line, data.frame(x=x))
+
+lines(x=0:1, yf(c(0,0)), col="grey30" )
+lines(x=c(1,1), yf(c(0,1)))
+text(.5, yf(.5), "1", adj=c(0.5,3), col="grey30")
+text(1.1, yf(.5), expression(beta))
+
+lines(x=1:2, yf(c(1,1)), col="grey30" )
+lines(x=c(2,2), yf(1:2))
+text(1.5, yf(1.5), "1", adj=c(0.5,3), col="grey30")
+text(2.1, yf(1.5), expression(beta))
+
+lines(x=2:3, yf(c(2,2)), col="grey30" )
+lines(x=c(3,3), yf(2:3))
+text(2.5, yf(2.5), "1", adj=c(0.5,3), col="grey30")
+text(3.1, yf(2.5), expression(beta))
+
+lines(x=3:4, yf(c(3,3)), col="grey30" )
+lines(x=c(4,4), yf(3:4))
+text(3.5, yf(3.5), "1", adj=c(0.5,3), col="grey30")
+text(4.1, yf(3.5), expression(beta))
+```
+
 
 ---
 
@@ -341,7 +448,7 @@ lines(c(-4, x_i), c(y_i, y_i), lty='dotted')
 axis(1, at=x_i, line=0, labels=expression(x[8]))
 axis(2, at=y_i, line=0, labels=expression(y[8]), las=1)
 lines(c(-4, x_i), c(y_h, y_h), lty='dotted')
-points(x_i, y_h,pch=16, cex=.7)
+points(x_i, y_h, pch=16, cex=.7, col = 'dark blue')
 axis(2, at=c(y_h, y_i), line=0, labels=expression(hat(y)[8], y[8]), las=1)
 ```
 
@@ -358,10 +465,11 @@ lines(c(-4, x_i), c(y_i, y_i), lty='dotted')
 axis(1, at=x_i, line=0, labels=expression(x[8]))
 axis(2, at=y_i, line=0, labels=expression(y[8]), las=1)
 
-shape::Arrows(x_i, y_h, x_i, y_i, col="grey20", arr.adj = 1, arr.length = 0.2, arr.width= 0.2, arr.type="triangle", lwd=1)
+shape::Arrows(x_i, y_h, x_i, y_i, col=6, 
+              arr.adj = 1, arr.length = 0.2, arr.width= 0.2, arr.type="triangle", lwd=1)
 lines(c(-4, x_i), c(y_h, y_h), lty='dotted')
 axis(2, at=c(y_h, y_i), line=0, labels=expression(hat(y)[8], y[8]), las=1)
-points(x_i, y_h, pch=16, cex=.7, col="grey20")
+points(x_i, y_h, pch=16, cex=.7, col = 'dark blue')
 text(x_i, mean(c(y_h, y_i)), col='black', adj=c(1.5, 0.5), expression(hat(epsilon)[8]), cex=1.2)
 ```
 
@@ -373,10 +481,10 @@ text(x_i, mean(c(y_h, y_i)), col='black', adj=c(1.5, 0.5), expression(hat(epsilo
 ```{r, echo=FALSE, fig.align="center", fig.dim=c(8,5), out.width="70%"}
 y_hat <- predict(line, data.frame(x=x))
 simple_plot(x,y)
-points(x, y_hat, pch=16, cex=.7, col="grey20")
-shape::Arrows(x, y, x, y_hat, col="grey20", arr.length=0, lwd=1)
-legend(legend=c("Observed data", "Predicted values of y","Residuals (unexplained variation in y)"), x = "topleft", bty="n",
-       pch=c(19,16,124), pt.cex=c(1,.7, 0.7), col=c(col_points,"grey20","grey20"), cex=.7)
+points(x, y_hat, pch=16, cex=.7, col='dark blue')
+shape::Arrows(x, y, x, y_hat, col=6, arr.length=0, lwd=1)
+legend(legend=c("Observed data", "Predicted values of y","Residuals (observed y - predicted y)"), x = "topleft", bty="n",
+       pch=c(19,16,124), pt.cex=c(1,.7, 0.7), col=c(1,"dark blue",6), cex=.7)
 
 ```
 
