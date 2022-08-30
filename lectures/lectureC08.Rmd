@@ -1,9 +1,9 @@
 ---
-title: "Lecture C8"
+title: "Lecture C08"
 subtitle: "Autoregression and Autocorrelation"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css", "adam.css"]
+    css: [default, default-fonts, "part_c.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -603,7 +603,7 @@ summary(lm_resid_lag1)
 ```
 ]]
 
-.right-code-wide[
+.right-plot[
 .small[
 ```{r echo=FALSE}
 housing_resid_lag <- 

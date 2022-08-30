@@ -1,9 +1,9 @@
 ---
-title: "Lecture C5"
+title: "Lecture C05"
 subtitle: "Linear models with multiple predictors and factors"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css", "adam.css"]
+    css: [default, default-fonts, "part_c.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -878,7 +878,7 @@ z_3 = \left\{
 
 
 --
-.small[
+.smaller[
 ```{r}
 tibble(y = rnorm(9), 
        x = c("A","A","A","B","B","B","C","C","C")) %>% 
@@ -893,6 +893,8 @@ tibble(y = rnorm(9),
 
 
 For two levels, we introduced an indicator variable $z$ that was `1` for level `B` and `0` otherwise. 
+
+
 For three levels, $\mathsf{A}$, $\mathsf{B}$, and $\mathsf{C}$, we need two indicator variables:
 
 

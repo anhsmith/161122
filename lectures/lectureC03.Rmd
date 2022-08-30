@@ -1,9 +1,9 @@
 ---
-title: "Lecture C3"
+title: "Lecture C03"
 subtitle: "A minimal theory of linear models"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css", "adam.css"]
+    css: [default, default-fonts, "part_c.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -145,15 +145,25 @@ These four assumptions are called the "**the Guass-Markov assumptions**".
 
 ## Wny do we need assumptions? 
 
+--
+
 - Without assumptions, there can be no conclusions.
+
+--
 
 - These four assumptions are critical for deriving the theory of linear model.
 
+--
+
 - They are even more critical in practice. If the assumptions are not true and we go ahead and assume them anyway, **our statistical inferences can be wrong**.
+
+--
 
 - Some assumptions are more important than others - the seriousness of violating them varies.
 
-- Lecture C4 - Residual Diagnostics will investigate this topic.
+--
+
+- Lecture C4 - Residual Diagnostics will investigate this topic in more detail.
 
 ---
 
@@ -187,11 +197,19 @@ A good combination of $\tilde{\alpha}$ and $\tilde{\beta}$ minimises the residua
 
 ## Minimising the variance of residuals
 
+--
+
 If we have only two pairs of observations, we can easily draw a line between them with residuals zero. 
+
+--
 
 Given more then two points, what can we do ?
 
+--
+
 We need some tools to measure the overall performance of a fitted line in terms of residuals. 
+
+--
 
 One way is to *minimise the variance of the residuals*, subject to their mean being 0. (Why mean 0?)
 
@@ -199,15 +217,23 @@ One way is to *minimise the variance of the residuals*, subject to their mean be
 
 ## Least-squares estimation
 
+--
+
 This is called **least-squares estimation**, as the formula for variance contains a sum of squares
 $$
 \begin{aligned}
 \mathsf{var}(\tilde\varepsilon_i) &= \frac{1}{n}\sum_{i=1}^n (\tilde\varepsilon_i - 0)^2= \frac{1}{n}\sum_{i=1}^n [y_i - (\tilde\alpha + \tilde\beta x_i)]^2
 \end{aligned}
 $$
+--
+
 By minimising the **residual variance** $\mathsf{Var}_\mathsf{res} = \frac{1}{n}\sum_{i=1}^n [y_i - (\hat\alpha + \hat\beta x_i)]^2$, we obtain the corresponding values of $\tilde\alpha$ and $\tilde\beta$ which are called **least squares estimates**.
 
+--
+
 We often put hats on parameters ( $\hat{\alpha}$, $\hat{\beta}$ ) to denote the least-squares estimates. This helps us to remember that they're sample statistics, differentiating them from the true values $\alpha$ and $\beta$ from the population and the arbitrary guesses $\tilde\alpha$ and $\tilde\beta$. 
+
+--
 
 In previous lectures we sometimes used $a$ and $b$ to talk about $\hat{\alpha}$ and $\hat{\beta}$.
 
@@ -255,9 +281,15 @@ ggplot() + xlim(0, 1.5) + ylim(0,20) +  geom_function(fun = Var_res, col='red') 
 
 ## A toy example
 
+--
+
 Some simple calculus reveals that $\mathsf{Var}_\mathsf{res}$ attains its minimum at $\tilde\beta=19/26\approx0.7308$.
 
+--
+
 This is an 'analytical solution'.
+
+--
 
 We can of course leave all the calculations to R. To fit a linear model without an intercept, we add `- 1` to the right hand side of the formula `y ~ x`.
 
@@ -272,13 +304,23 @@ coef(lm_no_intercept)
 
 ## Try some harder examples
 
+--
+
 Given three or more pairs of observations, we can still estimate $\beta$ manually or with R.
+
+--
 
 **Task**: Add a new observation $(x_3,y_3)=(9,12)$ to the two observations in our toy example. Re-estimate $\beta$ with all three observations with R.   
 
+--
+
 One can further estimate both the slope and the intercept in a linear model provided that the intercept is non-zero. To estimate two parameters simultaneously, i.e. $\alpha$ and $\beta$, we will need some **multivariate calculus**. 
 
+--
+
 More generally, the procedure of finding parameter values that minimise some loss function (e.g., variance of the residuals) is called **optimisation**. **Optimisation** plays a very important role in modern statistics!
+
+--
 
 Let's not dwell on the mathematical details. Conveniently, R does all the work for us!
 
@@ -434,10 +476,10 @@ To plot a function, must learn to write functions in R.
 
 We write a simple function to evaluate the residual variance in the toy example $\mathsf{Var}_\mathsf{res}(\tilde\beta)=26\tilde\beta^2-38\tilde\beta+17$.
 
-    ```{r, echo=TRUE}
-    Var_res <- function(beta_tilde) 26*beta_tilde^2-38*beta_tilde+17
-    Var_res(2)
-    ```
+```{r, echo=TRUE}
+Var_res <- function(beta_tilde) 26*beta_tilde^2-38*beta_tilde+17
+Var_res(2)
+```
 
 `Var_res()` is a user-defined function, i.e. our own R functions. 
 

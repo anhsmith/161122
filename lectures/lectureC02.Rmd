@@ -1,9 +1,9 @@
 ---
-title: "Lecture C2"
+title: "Lecture C02"
 subtitle: "Testing hypotheses and making predictions with linear models"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css", "adam.css"]
+    css: [default, default-fonts, "part_c.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -159,7 +159,7 @@ The probability of a normal variable falling into the $2\sigma$ region is given 
 ```{r, echo=TRUE}
 g <- 0.90
 qnorm(1-(1-g)/2)
-    ```
+```
 
 ---
 
@@ -175,7 +175,7 @@ The `t value` and `Pr(>|t|)` values relate to testing the **null hypothesis that
 
 --
 
-- A good scientists is sceptical, only believing in something if there is empirical evidence to support it.  
+- A good scientists is sceptical of any idea unless there is empirical evidence to support it.
 
 --
 
@@ -441,7 +441,7 @@ predict(mod, new.data, interval="confidence")
 
 --
 
-We are 95% confident that the true **average** body weight of donkeys with a heart girth of 120 is between  `r predict(mod, new.data, interval="confidence")[1,2]` and `r predict(mod, new.data, interval="confidence")[1,3]`. 
+We are 95% confident that the true **average** body weight of donkeys with a heart girth of 120 is between  `r round(predict(mod, new.data, interval="confidence")[1,2],1)` and `r round(predict(mod, new.data, interval="confidence")[1,3],1)`. 
 
 
 ---
@@ -458,7 +458,7 @@ predict(mod, new.data, interval="prediction")
 
 --
 
-We estimate that 95% of donkeys with a heart girth of 120 will have a body weight between  `r predict(mod, new.data, interval="prediction")[1,2]` and `r predict(mod, new.data, interval="prediction")[1,3]`. Note we have not used the word 'mean' or 'average' here, because this is about the spread of values around the mean.
+We estimate that 95% of donkeys with a heart girth of 120 will have a body weight between  `r round(predict(mod, new.data, interval="prediction")[1,2],1)` and `r round(predict(mod, new.data, interval="prediction")[1,3],1)`. Note we have not used the word 'mean' or 'average' here, because this is about the spread of values around the mean.
 
 --
 
@@ -496,7 +496,7 @@ legend("bottomright", border = NA,
        lty=c(1,1,1),
        # fill=c(NA, alpha(1, .6), alpha(1, .3)), 
        col=c(4, alpha(1, .6), alpha(1, .3)), lwd=c(3,20,20), 
-       legend=c("Regression line", "Confidence interval", "Prediction interval"), bty="n")
+       legend=c("Regression line", "Confidence interval for the mean", "Prediction interval for the data"), bty="n")
 ```
 
 ---
@@ -517,11 +517,19 @@ predict(mod, new.data, interval="prediction", level = 0.99)
 
 ## Confidence and prediction intervals
 
+--
+
 We can predict the mean of $y$ given any reasonable values of $x$. 
+
+--
 
 For a refined grid of $x$, we can lineate the lower limits and upper limits of corresponding confidence/prediction intervals.
 
+--
+
 This leads to a pointwise confidence/prediction band for our linear model. 
+
+--
 
 As we can see from the previous plot, among 100 pairs of observations, there are a few points falling outside the 95% prediction band. 
 
@@ -535,15 +543,23 @@ class: middle, inverse
 
 ## Another possible model?
 
+--
+
 A scientist dismissed the linear model studied by us and then conjectured that the relationship between the body weight and the heart girth is best modelled by a power-law relationship as
 
 $$\mathsf{Body weight} = c\times [\mathsf{Heart girth}]^k$$
 
 with $c$ and $k$ being some unknown parameters.
 
+--
+
 How can we handle this non-linear model?
 
+--
+
 We can still fit this model under the framework of simple linear regression!
+
+--
 
 We just apply a log transformation to both sides of the above power-law relationship as
 
@@ -554,11 +570,19 @@ $$\log(\mathsf{Body weight}) = \log(c) + k\times \log(\mathsf{Heart girth})$$
 
 ## Fit the transformed model
 
+--
+
 Set the response $y=\log(\mathsf{Body weight})$ and the predictor $x=\log(\mathsf{Heart girth})$.
+
+--
 
 The parameters can be further transformed as $\alpha=\log(c)$ and $\beta=k$.
 
+--
+
 We can now fit a linear model to the transformed data 
+
+--
 
 ```{r, echo=TRUE, eval=FALSE}
 mod2 <- lm(log(Bodywt) ~ log(Heartgirth), data=donkey)
@@ -567,48 +591,104 @@ summary(mod2)
 
 ---
 
-## Model outputs with transformation 
 
-Task: Let's interpret the model outputs.
+.pull-left[
 
-```{r, echo=FALSE}
-mod2 <- lm(log(Bodywt) ~ log(Heartgirth), data=donkey)
-summary(mod2)
-```
+## Model without log transformation 
 
----
-
-## Model outputs without transformation 
-
-Which model is better?
+.smaller[
 
 ```{r, echo=FALSE}
 summary(mod)
 ```
 
+]]
+
+--
+
+.pull-right[
+
+## Model with log transformation 
+
+.smaller[
+
+```{r, echo=FALSE}
+mod2 <- lm(log(Bodywt) ~ log(Heartgirth), data=donkey)
+summary(mod2)
+```
+]]
+
+--
+
+.center[
+Which model is better?
+]
+
+--
+
+.center[
+Why are the coefficients so different?
+]
+
+--
+
+.center[
+Let's plot the models...
+]
+
 ---
 
-## Comparing two models via plots
-
-The graphical approach could always be your first choice, though the difference is not very clear here. 
 
 ```{r, echo=FALSE, fig.align="center", fig.dim=c(10,4), out.width="100%"}
 library(visreg)
 g1 <- visreg(mod,partial=TRUE,gg=TRUE) + ggtitle('lm(Bodywt ~ Heartgirth)') + theme(plot.title    = element_text(family = "mono", size = 14))
 g2 <- visreg(mod2,trans=exp,partial=TRUE,gg=TRUE) + ggtitle('lm(log(Bodywt) ~ log(Heartgirth))') + theme(plot.title = element_text(family = "mono", size = 14)) + ylab("Bodywt")
-g1 + g2
+
 ```
 
+
+.pull-left[
+
+## Model without log transformation 
+
+```{r, echo=FALSE, fig.align="center", fig.dim=c(6,5), out.width="100%"}
+g2
+```
+]
+
+.pull-right[
+
+## Model with log transformation 
+
+```{r, echo=FALSE, fig.align="center", fig.dim=c(6,5), out.width="100%"}
+g1
+```
+]
+
+
+--
+
+.center[
+Which do you prefer?
+]
 
 ---
 
 ## Comparing two models via the goodness of fit
 
-The '`Multiple R-squared`' or '$R^2$' is called '**the coefficient of determination**'. It measures the proportion of variation in $y$ that is  explained by a model.
+--
 
-For the linear model in the raw scale, $R^2=0.8048$.
+The '`Multiple R-squared`' or ' $R^2$ ' is called '**the coefficient of determination**'. It measures the proportion of variation in $y$ that is  explained by a model.
 
-For the linear model in the log scale, i.e. the power law model, $R^2=0.8223$.
+--
+
+For the linear model in the raw scale, $R^2=0.80$.
+
+--
+
+For the linear model in the log scale, i.e. the power law model, $R^2=0.82$.
+
+--
 
 The power law model explains more of the variation in the data. By this measure, it is better than the original linear model fit to the raw $x$ and $y$.
 
@@ -616,17 +696,29 @@ The power law model explains more of the variation in the data. By this measure,
 
 ## Comparing two models via prediction (MSE)
 
+--
+
 $R^2$ is a convenient index for comparing two models.
+
+--
 
 A high $R^2$ suggests a good fit to the observed data.
 
-In other words, a model with a high $R^2$ provides a better **interpretation** or **explanation** on the things we observed.
+--
+
+In other words, a model with a high $R^2$ explains more variation in the response variable $y$, and leaves less of the variation in $y$ as unexplained random 'noise'.
+
+--
 
 In statistics, when we are building a linear model, our focus may be on the things we have not observed, i.e. **prediction** or **forecasting**.
 
+--
+
 A high $R^2$ does not necessarily yield a good prediction model.
 
-Correspondingly, a low $R^2$ does not necessarily lead to a bad prediction model!
+--
+
+Correspondingly, a low $R^2$ does not necessarily lead to a bad prediction model! It is better to have a more realistic model with more noise than an unrealistic model that makes overconfident predictions.
 
 ---
 
@@ -663,13 +755,23 @@ We will see better models in the next few weeks.
 
 ## Comparing two models via prediction (MSE)
 
+--
+
 In the scientific research, after building some candidate models, the researchers have to conduct experiments to collect new data to validate those models. 
+
+--
 
 Given an observed sample of data $(x_{1},y_{1}),\ldots,(x_{n},y_{n})$, let the fitted linear model be $y=\hat\alpha+\hat\beta x$. 
 
+--
+
 A researcher now collect a new sample of data as $(x_{n+1},y_{n+1}),\ldots,(x_{n+m},y_{n+m})$. 
 
+--
+
 She or he can compute the predictions of the fitted model at the values $x_{n+1},\ldots,x_{n+m}$ as $\hat{y}_{n+1}=\hat\alpha+\hat\beta x_{n+1},\ldots,\hat{y}_{n+m}=\hat\alpha+\hat\beta x_{n+m}$.
+
+--
 
 The prediction performance can be evaluated by comparing the true observed responses $y_{n+1},\ldots,y_{n+m}$ against the predicted responses $\hat{y}_{n+1},\ldots,\hat{y}_{n+m}$.
 
@@ -677,15 +779,23 @@ The prediction performance can be evaluated by comparing the true observed respo
 
 ## Comparing two models via prediction (MSE)
 
+--
+
 Similar to the residual variance, we can define the **mean square error** (**MSE**) as
 
 $$\mathsf{MSE}=\frac{1}{m}\sum_{i=1}^{m}(y_{n+i}-\hat{y}_{n+i})^2$$
 
+--
+
 MSE serves a critical index to measure the prediction performance of candidate models.
+
+--
 
 It reduces to the residual variance if we supply the original observation $(x_1,\ldots,x_n)$ to it. 
 
-Often need new data! 
+--
+
+Often need a new dataset to judge the predictive accuracy of a model! 
 
 ---
 
@@ -722,17 +832,31 @@ MSE.powerlaw
 
 ## MSE for the power law model
 
+--
+
 - `predict()` returns the fitted values for the original data if `new.data` is not supplied.
+
+--
 
 - `sum()` returns the summation of a vector
 
+--
+
 - The basic arithmetic and function operations, like `exp()`, `-`, `^2` and `/n`, is applied to sequences of predictions `pred.linear`, `pred.powerlaw` and observations `donkey$Bodywt` term by term.  
+
+--
 
 - We can see that the power law model outperforms the linear model in terms of MSE. 
 
+--
+
 - We will confirm this result again in Lecture C4 - Residual Diagnostics!
 
+--
+
 - However, MSE here still serves as an index on the goodness of fit, not really an indicator on the prediction performance.  
+
+--
 
 - We will see a few more examples on prediction in the coming weeks. 
 

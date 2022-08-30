@@ -1,9 +1,9 @@
 ---
-title: "Lecture C1"
+title: "Lecture C01"
 subtitle: "Simple Linear Regression"
 output:
   xaringan::moon_reader:
-    css: [default, default-fonts, "custom.css", "adam.css"]
+    css: [default, default-fonts, "part_c.css"]
     # mathjax: "https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-MML-AM_CHTML"
     nature:
       highlightStyle: tomorrow
@@ -50,13 +50,23 @@ class: middle, inverse
 
 ## Two centuries of history 
 
+--
+
 The earliest regression was fit using the method of least squares, which was published by Legendre in 1805 and by Gauss in 1809. Both applied the method to the problem of determining the orbits of bodies about the sun from astronomical observations.
+
+--
 
 The term "regression" was coined by Francis Galton in the nineteenth century to describe a biological phenomenon - regression toward the mean. 
 
+--
+
 The phenomenon was that the heights of descendants of tall ancestors tend to regress down towards a normal average.
  
+--
+
 Galton's work on regression had only this biological meaning and it was later extended by Udny Yule and Karl Pearson to more general statistical contexts.
+
+--
 
 Great mathematicians and statisticians spent almost two hundreds years to build the whole framework for linear regression. We will learn it in two weeks!
 
@@ -206,11 +216,19 @@ g3
 
 ## Recap and definitions
 
+--
+
 $y$ is the **response**, or **dependent variable**, that we wish to model.
+
+--
 
 $x$ is the **explanatory** variable, **predictor**, **covariate**, or **independent variable**. We use $x$ to explain variation in $y$. When $x$ is numeric, the model is called a "regression", but we can also fit linear model to categorical predictors.
 
+--
+
 The **regression line** tells us the estimate of $y$ for any value of $x$.
+
+--
 
 For simple linear regression, the predicted $y$, or $\hat{y}$, is modelled as:
 
@@ -363,13 +381,23 @@ text(4.1, yf(3.5), expression(beta))
 
 ## Fixed design and random design
 
+--
+
 We usually observe multiple pairs of observations of $y$ and $x$: $(x_1,y_1),(x_2,y_2),\ldots,(x_n,y_n)$.
+
+--
 
 Notice that only the mean of $y$ is related to $x$ via the line. 
 
+--
+
 There is almost always random variation in the $y$ values around the regression line, but is there also random variation in the covariate $x$?
 
+--
+
 We often treat $x$ as non-random or 'fixed' by the experimenter, and this is called the 'fixed design setting'. If $x$ is treated as a random variable, the model is in the 'random design setting'. 
+
+--
 
 In this course, we assume all the linear models are in the fixed design setting. Therefore, the values of $x$ are not random. 
 
@@ -377,7 +405,11 @@ In this course, we assume all the linear models are in the fixed design setting.
 
 ## A mathematical formulation of the linear model
 
+--
+
 We can denote the data set in simple linear regression by $(x_1,y_1),(x_2,y_2),\ldots,(x_n,y_n)$
+
+--
 
 We model the uncertainty or noisiness of the individual values of $y_i$ around the regression line takes the form of additive random errors denoted by $\varepsilon_i$.
 
@@ -394,17 +426,25 @@ $$
 y_n=\alpha+\beta x_n +\varepsilon_n.
 $$
 
-You will never observe the true noises! But all the randomness comes from them. 
+You will never observe the true errors! But all the randomness comes from them. 
 
 ---
 
 ## Sample versus population
 
+--
+
 The $\alpha$ and $\beta$ are known as 'coefficients' or 'parameters', which determine the linear relationship between $y$ and $x$ in the population. These values are fixed and unknown. We could only know them with 100% certainty if we measured every horse that ever lived or ever will live.
+
+--
 
 Instead, we collect data from a sample of horses and fit a model to these data to *estimate* the coefficients. We used our sample data to obtain 'point estimates' $\hat\alpha$ and $\hat\beta$.
 
+--
+
 The sample statistics $\hat\alpha$ and $\hat\beta$ are point estimates of the true population parameters $\alpha$ and $\beta$. This process of estimating population parameters with sample statistics is generally referred to as 'statistical inference'.
+
+--
 
 An infinite number of lines is possible, each determined by different values of the coefficients. We need some criterion for choosing our 'best guess' point estimates of the coefficients based on our data set. 
 
@@ -492,7 +532,11 @@ legend(legend=c("Observed data", "Predicted values of y","Residuals (observed y 
 
 ## Estimating the parameters
 
+--
+
 For each value of $x_i$, we have an estimated value of $y_i$, given by $\hat{y}_i = \hat\alpha + \hat\beta x_i$.
+
+--
 
 The difference between the real $y_i$ and fitted $\hat{y}_i$ is the '*residual*' $\hat\varepsilon_i = y_i - \hat{y}_i$. Residuals represent the random errors, random deviations from the mean of $y$ given $x$. 
 
@@ -500,7 +544,11 @@ The difference between the real $y_i$ and fitted $\hat{y}_i$ is the '*residual*'
 - Residuals near zero correspond to horses as heavy as expected given their heart girth. 
 - Negative residuals correspond to horses that are lighter than expected given their heart girth. 
 
+--
+
 Our estimates of the intercept and slope $\hat\alpha$ and $\hat\beta$ are obtained by finding the values that minimise the variance of the residuals. This is called 'least squares' estimation.
+
+--
 
 The residual variance is given by:
 
@@ -534,9 +582,15 @@ summary(mod)
 
 `lm()` is the R function to fit linear models. We will use it extensively!
 
+--
+
 The first argument is `formula = Bodywt ~ Heartgirth`. More generally, we use the simple formula `response ~ predictor` to specify the required simple regression model. 
 
+--
+
 The second argument `data = donkey` specifies the data object where the response and predictor variables can be found.
+
+--
 
 The function `summary()` is a generic tool used to print a summary of the information in an R object.
 
@@ -557,14 +611,22 @@ summary(mod)
 
 ## Linear models in R
 
+--
+
 `Call:`
 `lm(formula = Bodywt ~ Heartgirth, data = donkey)` 
 
 simply repeats the model you have fitted.
 
+--
+
 `Residuals:` provides you a quick summary on the distribution of your residuals with `min`, `max`, `median` and another two quartiles. 
 
+--
+
 `Coefficients:` summarizes the information on the estimates for the regression coefficients and `Estimate` column gives us the values of our coefficients. We will discuss the columns `Std. Error`, `t value` and `Pr(>|t|)` in Lecture C2.
+
+--
 
 We can also extract just the coefficients with the function `coef()`. 
 
@@ -572,7 +634,11 @@ We can also extract just the coefficients with the function `coef()`.
 ab <- coef(mod); ab
 ```
 
+--
+
 In our case, the linear model equation is $\mathsf{Body weight} =$ `r round(ab[1],1)` $+$ `r round(ab[2],2)` $\times \mathsf{ Heart girth}$
+
+--
 
 The estimate for `Heartgirth` means that if the heart girth of Horse A is 1 unit larger than that of Horse B, we expect Horse A to be `r round(coef(mod)[2],2)` units heavier than Horse B, on average.
 
