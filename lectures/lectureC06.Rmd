@@ -28,8 +28,7 @@ library(fontawesome)
 library(visreg)
 opts_chunk$set(#dev.args=list(bg='transparent'), 
                comment="", warning=FALSE, echo=FALSE)
-col_points <- "#7f577492"
-col_dark   <- "#5f4354"
+
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.dim=c(8,5), out.width="70%", fig.retina=2)
 ```
@@ -193,7 +192,7 @@ https://shiny.massey.ac.nz/jcmarsha/twoway/
 ## Interactions in R: petrel data
 
 ```{r, echo=TRUE}
-petrels <- read.csv("http://www.massey.ac.nz/~jcmarsha/227215/data/petrels.csv") %>% 
+petrels <- read.csv("https://www.massey.ac.nz/~jcmarsha/227215/data/petrels.csv") %>% 
   transmute(`Wing length`=R.Wing.Lth, Area=as_factor(Area), Sex=as_factor(Sex)) %>% drop_na()
 
 # model without interaction
@@ -573,7 +572,7 @@ The model fits two parallel lines, one for each level of the factor. Their slope
 ## Example: Calf weights
 
 ```{r, echo=TRUE, fig.dim=c(7,4), fig.height = "50%", message=FALSE}
-calf <- read_csv("http://www.massey.ac.nz/~jcmarsha/227215/data/calfweight.csv")
+calf <- read_csv("https://www.massey.ac.nz/~jcmarsha/227215/data/calfweight.csv")
 ggplot(calf, aes(x=Age, y=Weight, col=Breed, shape=Treatment)) + 
   geom_point(size=3, alpha=0.6) + xlab("Age (days)") + ylab("Weight (kg)")
 ```

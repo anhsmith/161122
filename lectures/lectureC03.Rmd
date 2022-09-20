@@ -25,8 +25,6 @@ library(ggplot2); theme_set(theme_bw(base_size=15))
 library(patchwork)
 library(fontawesome)
 opts_chunk$set(dev.args=list(bg='transparent'), comment="", warning=FALSE, echo=FALSE)
-col_points <- "#7f577492"
-col_dark   <- "#5f4354"
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.dim=c(8,5), out.width="70%", fig.retina=2)
 ```
