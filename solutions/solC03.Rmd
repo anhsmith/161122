@@ -1,5 +1,5 @@
 ---
-title: "Workshop C3: Diagnostics and Transformations"
+title: "Workshop C03: Diagnostics and Transformations"
 output:
   html_document: 
     toc: yes
@@ -17,18 +17,29 @@ library(tidyverse)
 1. Load the package `datarium` and the data `marketing`. Fit the linear model, and save the result in the object `lm.youtube` again. Then, sweep your fitted result by the package `broom` and get the tidy version `lm.youtube`.
 
     ```{r}
-    library(datarium)
+library(datarium)
     library(broom)
     data(`marketing`)
     lm.youtube <- lm(sales ~ youtube, data=marketing)
     lm.youtube.fit <- augment(lm.youtube)
+```
+
+
+    ```{r}
+
+    library(visreg); 
+    visreg(lm.youtube)
     ```
 
 2. Get all prediction intervals for each observed `youtube` by calling `predict()` without supplying `new.data`, and save the result in `lm.youtube.pred`. We can then bind `lm.youtube.pred` with `lm.youtube.fit` by column with the R function `cbind()`, aka colunm bind.
 
     ```{r}
     lm.youtube.pred <- predict(lm.youtube, interval='prediction')
-    lm.youtube.fit.pred <- lm.youtube.fit |> cbind(lm.youtube.pred) |> select(-fit) |> tibble()
+    lm.youtube.fit.pred <- 
+      lm.youtube.fit |> 
+      cbind(lm.youtube.pred) |> 
+      select(-fit) |> 
+      tibble()
     lm.youtube.fit.pred
     ```
 
@@ -37,9 +48,11 @@ library(tidyverse)
 3. First, visualise your linear model with the fitted line and the scatter plot. You can then add the prediction band by the R function `geom_ribbon()` with `aes(ymin = lwr, ymax = upr)` which defines a shaded region bounded by the lower limits and upper limits of the prediction intervals in your plot. You may need to adjust `fill` and `alpha` in `geom_ribbon()` to get a nicer plot.
 
     ```{r}
-    lm.youtube.fit.pred |> ggplot(aes(x = youtube ,y=sales)) +
+    lm.youtube.fit.pred |> 
+      ggplot(aes(x = youtube ,y=sales)) +
         geom_point() +
-        geom_ribbon(aes(ymin = lwr, ymax = upr), fill = "grey70", alpha=0.5) +
+        geom_ribbon(aes(ymin = lwr, ymax = upr), 
+                    fill = "grey70", alpha=0.5) +
         geom_smooth(method='lm')
     ```
     
@@ -48,29 +61,53 @@ library(tidyverse)
 **Answer**: It is not hard to see that there are 9 points falling outside the bands. This results in $1-9/200=95.5\%$ observations within the bands. The result agrees well with the confidence level. We can also complete this job by `filter()` and `summarise()`.
 
     ```{r}
-    lm.youtube.fit.pred |> filter(sales>upr|sales<lwr) |> summarise(n())
+    lm.youtube.fit.pred |> 
+      dplyr::filter(sales > upr | sales < lwr) |> 
+      summarise(n())
     ```
 
 5. Actually, the prediction band we plotted is a **pointwise** 95% prediction interval. The term **pointwise** means that, each individual observation falls into the corresponding prediction interval with a probability 95%. *Try to split `youtube` into two groups `youtube<200` and `youtube>200` and count the points falling in the prediction band for each group. Add one or two comments on your findings.*
 
-**Answer**: Graphical approaches are not attrative this time but we can still use `filter()` and `summarise()`. The results can be found in the following R code chunks. The critical issue is that the prediction bands seem too wide for the lower budgets and too narrow for the higher budgets. The bands are not consistent for different budgets (`x`) and therefore violate the pointwise condition. 
+**Answer**: Graphical approaches are not attractive this time but we can still use `filter()` and `summarise()`. The results can be found in the following R code chunks. The critical issue is that the prediction bands seem too wide for the lower budgets and too narrow for the higher budgets. The bands are not consistent for different budgets (`x`) and therefore violate the pointwise condition. 
 
     ```{r}
-    lm.youtube.fit.pred |> filter(youtube>200) |> ggplot(aes(x = youtube ,y=sales)) +
+    lm.youtube.fit.pred |> 
+      dplyr::filter(youtube>200) |> 
+      ggplot(aes(x = youtube ,y=sales)) +
         geom_point() +
-        geom_ribbon(aes(ymin = lwr, ymax = upr), fill = "grey70", alpha=0.5) +
-        geom_smooth(method='lm')
-        lm.youtube.fit.pred |> filter(youtube<200) |> ggplot(aes(x = youtube ,y=sales)) +
-        geom_point() +
-        geom_ribbon(aes(ymin = lwr, ymax = upr), fill = "grey70", alpha=0.5) +
-        geom_smooth(method='lm')
+        geom_ribbon(aes(ymin = lwr, ymax = upr), 
+                    fill = "grey70", alpha=0.5) +
+        geom_smooth(method='lm', se=F)
+    
+    lm.youtube.fit.pred |> 
+          dplyr::filter(youtube<200) |> 
+          ggplot(aes(x = youtube ,y=sales)) +
+          geom_point() +
+          geom_ribbon(aes(ymin = lwr, ymax = upr), 
+                      fill = "grey70", alpha=0.5) +
+          geom_smooth(method='lm', se = F)
     ```
 
     ```{r}
-    lm.youtube.fit.pred |> filter(youtube>200) |> summarise(n())
-    lm.youtube.fit.pred |> filter(youtube>200) |> filter(sales<upr) |> filter(sales>lwr) |> summarise(n())
-    lm.youtube.fit.pred |> filter(youtube<200) |> summarise(n())
-    lm.youtube.fit.pred |> filter(youtube<200) |> filter(sales<upr) |> filter(sales>lwr) |> summarise(n())
+    lm.youtube.fit.pred |> 
+      dplyr::filter(youtube>200) |> 
+      summarise(n())
+    
+    lm.youtube.fit.pred |> 
+      dplyr::filter(youtube>200) |> 
+      dplyr::filter(sales<upr) |> 
+      dplyr::filter(sales>lwr) |> 
+      summarise(n())
+    
+    lm.youtube.fit.pred |> 
+      dplyr::filter(youtube<200) |> 
+      summarise(n())
+    
+    lm.youtube.fit.pred |> 
+      dplyr::filter(youtube<200) |> 
+      dplyr::filter(sales<upr) |> 
+      dplyr::filter(sales>lwr) |> 
+      summarise(n())
     ```
 
 ## Exercise 2: Model diagnostics
@@ -109,31 +146,50 @@ with Linearity being the most important.
 
 1. Firstly we'll be looking at linearity and equal variance, both of which can be assessed using a plot of **the residuals versus the fitted value**.
 
-    If linearity holds, we'd expect a plot of residuals vs fitted value to show no trend - the points should be scattered fairly constantly above and below the line - in particular we don't want to see a curve.
+  If linearity holds, we'd expect a plot of residuals vs fitted value to show no trend - the points should be scattered fairly constantly above and below the line - in particular we don't want to see a curve.
 
-    If equal variance holds, we'd expect the scatter of points around the trend to be constant as the fitted value changes. You want it to be relatively even, and in particular not increasing from left to right (i.e. not spreading out).
+   If equal variance holds, we'd expect the scatter of points around the trend to be constant as the fitted value changes. You want it to be relatively even, and in particular not increasing from left to right (i.e. not spreading out).
 
-    We can demonstrate this idea by using the stochastic simulation. An example of a good plot (left) and bad plot (right) is shown below for two artificial data sets, i.e., linear and exponential. 
+  We can demonstrate this idea by using the stochastic simulation. An example of a good plot (left) and bad plot (right) is shown below for two artificial data sets, i.e., linear and exponential. 
 
     ```{r,  fig.width=8, fig.height=3,}
     set.seed(2020)
     n <- 50
     ab <- c(0,2)
-    demo <- tibble(x=(1:n)/n, e= rnorm(n, sd=0.1)) |> mutate (y=ab[1]+ab[2]*x+e) |> 
-      mutate (y2=exp(ab[1]+ab[2]*x+e))
-    demo |> select(x, y, y2) |> gather(key = "Group", value = "Y", -x) |>
-      ggplot(aes(x=x,y=Y,col=Group)) + geom_point()
-    g1 <- lm(y~x,data=demo) |> augment() |> 
-      ggplot(aes(x=.fitted,y=.resid)) + geom_point() +geom_smooth()+geom_hline(yintercept=0)
-    g2 <- lm(y2~x,data=demo) |> augment() |> 
-      ggplot(aes(x=.fitted,y=.resid)) + geom_point() +geom_smooth()+geom_hline(yintercept=0)
+    
+    demo <- tibble(x=(1:n)/n, 
+                   e= rnorm(n, sd=0.1)) |> 
+      mutate (y = ab[1] + ab[2]*x + e) |> 
+      mutate (y2 = exp( ab[1] + ab[2] * x + e ))
+    
+    demo |> 
+      select(x, y, y2) |> 
+      gather(key = "Group", value = "Y", -x) |>
+      ggplot(aes(x=x,y=Y,col=Group)) + 
+      geom_point() +
+      geom_smooth(method="lm")
+    
+    g1 <- lm(y~x,data=demo) |> 
+      augment() |> 
+      ggplot(aes(x=.fitted,y=.resid)) + 
+      geom_point() +
+      geom_smooth() +
+      geom_hline(yintercept=0)
+    
+    g2 <- lm(y2~x,data=demo) |> 
+      augment() |> 
+      ggplot(aes(x=.fitted,y=.resid)) + 
+      geom_point() +
+      geom_smooth() +
+      geom_hline(yintercept=0)
+    
     library(patchwork)
-    g1+g2 
+    g1 + g2 
     ```
 
-    *Compare the scatter plots and the plots of residuals versus fitted values. Think about the reason why we include horizontal lines at $y=0$ and smoothed curves with confidence bands in the residual plots.*
+  *Compare the scatter plots and the plots of residuals versus fitted values. Think about the reason why we include horizontal lines at $y=0$ and smoothed curves with confidence bands in the residual plots.*
 
-    **Answer**: The right panel shows a clear curvature but the left panel looks quite random. The blue smoothed curves try to extract general patterns from residuals vs fits plots and the confidence bands can help to tell if the general trend differs a lot from the baseline ($y=0$). 
+  **Answer**: The right panel shows a clear curvature but the left panel looks quite random. The blue smoothed curves try to extract general patterns from residuals vs fits plots and the confidence bands can help to tell if the general trend differs a lot from the baseline ($y=0$). 
 
     You can see more examples using the interactive found here:
  
@@ -145,14 +201,31 @@ with Linearity being the most important.
     set.seed(2020)
     n <- 50
     ab <- c(0,0.5)
-    demo <- tibble(x=(1:n)/n, e= rnorm(n, sd=0.1)) |> mutate (y=ab[1]+ab[2]*x+e) |> 
+    demo <- tibble(x=(1:n)/n, e= rnorm(n, sd=0.1)) |> 
+      mutate (y=ab[1]+ab[2]*x+e) |> 
       mutate (y2=exp(ab[1]+ab[2]*x+e))
-    demo |> select(x, y, y2) |> gather(key = "Group", value = "Y", -x) |>
-      ggplot(aes(x=x,y=Y,col=Group)) + geom_point()
-    g1 <- lm(y~x,data=demo) |> augment() |> 
-      ggplot(aes(x=.fitted,y=.resid)) + geom_point() +geom_smooth()+geom_hline(yintercept=0)
-    g2 <- lm(y2~x,data=demo) |> augment() |> 
-      ggplot(aes(x=.fitted,y=.resid)) + geom_point() +geom_smooth()+geom_hline(yintercept=0)
+    
+    demo |> 
+      select(x, y, y2) |> 
+      gather(key = "Group", value = "Y", -x) |>
+      ggplot(aes(x=x,y=Y,col=Group)) + 
+      geom_point() +
+      geom_smooth(method="lm")
+    
+    g1 <- lm(y~x,data=demo) |> 
+      augment() |> 
+      ggplot(aes(x=.fitted,y=.resid)) + 
+      geom_point() +
+      geom_smooth() +
+      geom_hline(yintercept=0)
+    
+    g2 <- lm(y2~x,data=demo) |> 
+      augment() |> 
+      ggplot(aes(x=.fitted,y=.resid)) + 
+      geom_point() +
+      geom_smooth() +
+      geom_hline(yintercept=0)
+    
     library(patchwork)
     g1+g2 
     ```
@@ -162,8 +235,11 @@ with Linearity being the most important.
 2. Let's see how well our model for sales does by producing the diagnostic plot for the linear model you fit above using the following. 
     
     ```{r}
-    lm.youtube.fit |> ggplot(aes(x=.fitted,y=.resid)) +
-      geom_point()+geom_smooth()+geom_hline(yintercept=0)
+    lm.youtube.fit |> 
+      ggplot(aes(x=.fitted,y=.resid)) +
+      geom_point()+
+      geom_smooth()+
+      geom_hline(yintercept=0)
     ```
 
     *Take a good look at the plot. Do you think linearity and equal variance hold? Add some notes about each assumption to your notebook.*
@@ -174,8 +250,13 @@ with Linearity being the most important.
 3. In addition to the residuals vs fits plot, we have another tool, i.e. **the scale-location plot**, to check equal variance. The plot can be generated by using the following R code chunk:
     
     ```{r}
-    lm.youtube.fit |> mutate(.root.abs.std.resid=sqrt(abs(.std.resid))) |>
-      ggplot(aes(x=.fitted,y=.root.abs.std.resid)) + geom_point()+geom_smooth()+geom_hline(yintercept=0)
+    lm.youtube.fit |> 
+      mutate(.root.abs.std.resid = sqrt(abs(.std.resid))) |>
+      ggplot(aes(x=.fitted,
+                 y=.root.abs.std.resid)) +
+      geom_point()+
+      geom_smooth()+
+      geom_hline(yintercept=0)
     ```
     
     Similar to the residual versus fits plot, the scale-Location plot shows whether residuals are spread equally along the ranges of input variables (predictor). The assumption of equal variance (**homoscedasticity**) could also be checked with this plot. If we see a horizontal line with randomly spread points, it means that the model is good.
@@ -198,14 +279,33 @@ with Linearity being the most important.
     set.seed(2020)
     n <- 100
     ab <- c(0,2)
-    demo <- tibble(x=(1:n)/n, e= rnorm(n, sd=0.25)) |> mutate (y=ab[1]+ab[2]*x+e) |> 
+    demo <- tibble(x=(1:n)/n, 
+                   e= rnorm(n, sd=0.25)) |> 
+      mutate (y=ab[1]+ab[2]*x+e) |> 
       mutate (y2=exp(ab[1]+ab[2]*x+e))
-    demo |> select(x, y, y2) |> gather(key = "Group", value = "Y", -x) |>
-      ggplot(aes(x=x,y=Y,col=Group)) + geom_point()
-    g1 <- lm(y~x,data=demo) |> augment() |> mutate(.root.abs.std.resid=sqrt(abs(.std.resid))) |>
-      ggplot(aes(x=.fitted,y=.root.abs.std.resid))  + geom_point() +geom_smooth()+geom_hline(yintercept=0)
-    g2 <- lm(y2~x,data=demo) |> augment() |> mutate(.root.abs.std.resid=sqrt(abs(.std.resid))) |>
-      ggplot(aes(x=.fitted,y=.root.abs.std.resid))  + geom_point() +geom_smooth()+geom_hline(yintercept=0)
+    
+    demo |> 
+      select(x, y, y2) |> 
+      gather(key = "Group", value = "Y", -x) |>
+      ggplot(aes(x=x,y=Y,col=Group)) + 
+      geom_point()
+    
+    g1 <- lm(y~x,data=demo) |> 
+      augment() |> 
+      mutate(.root.abs.std.resid=sqrt(abs(.std.resid))) |>
+      ggplot(aes(x=.fitted,y=.root.abs.std.resid))  + 
+      geom_point() +
+      geom_smooth()+
+      geom_hline(yintercept=0)
+    
+    g2 <- lm(y2~x,data=demo) |> 
+      augment() |> 
+      mutate(.root.abs.std.resid=sqrt(abs(.std.resid))) |>
+      ggplot(aes(x=.fitted,y=.root.abs.std.resid))  + 
+      geom_point() +
+      geom_smooth()+
+      geom_hline(yintercept=0)
+    
     library(patchwork)
     g1+g2 
     ```
@@ -214,7 +314,10 @@ with Linearity being the most important.
 4. The residuals vs fits plot and scale-location plot are usually sufficient for us to tell the issues on linearity and equal variance. Our next task is to verify the normality. Recall the simulation study in Lab 2 where we make a scatter plot of the residuals versus true random errors which can be approximated by the line $y=x$. Even if we can't observe the true random error in a real problem, we can still make a similar plot called **quantile-quantile plot**, aka **Q-Q plot**, via `geom_qq()` and `geom_qq_line` as follows. 
 
     ```{r}
-    lm.youtube.fit |> ggplot(aes(sample=.std.resid)) + geom_qq(alpha=0.3) +  geom_qq_line(color='red')
+    lm.youtube.fit |> 
+      ggplot(aes(sample=.std.resid)) + 
+      geom_qq(alpha=0.3) +  
+      geom_qq_line(color='red')
     ```
 
     We are using the standardised residuals again. `geom_qq()` adds the black points while `geom_qq_line()` dispicts the red line. If most points follow the red line, we can feel free to assume the normality of the residuals. However, one must confirm the linearity and equal variance first before thinking about the normality. 
@@ -223,7 +326,10 @@ with Linearity being the most important.
     
     ```{r}
     set.seed(2020)
-    tibble(e=rnorm(100)) |> ggplot(aes(sample=e)) + geom_qq(alpha=0.3) +  geom_qq_line(color='red')
+    tibble(e=rnorm(100)) |> 
+      ggplot(aes(sample=e)) + 
+      geom_qq(alpha=0.3) +  
+      geom_qq_line(color='red')
     ```
     
     *Take a good look at the above two plots. Do you think the normality hold? Add some notes about the assumption to your notebook.*
@@ -237,7 +343,10 @@ with Linearity being the most important.
     This peice of informaiont is readily collected by `augment()` in the column `.cooksd`. The following R code chunk produces a plot of Cook's distance against the index. 
     
     ```{r}
-    lm.youtube.fit |> mutate(.index=1:n()) |> ggplot(aes(y=.cooksd,x=.index)) + geom_col() 
+    lm.youtube.fit |> 
+      mutate(.index=1:n()) |> 
+      ggplot(aes(y=.cooksd,x=.index)) + 
+      geom_col() 
     ```
     
     Those spikes in the above plot suggests potential outliers. However, one need a cut-off point to distinguish the outliers from those tamed observations. Unfortunately, there is no a golden rule to split these two groups of points for arbitrary data sets. Some people uses 0.5 or 1 as a cut-off point but our Cook's distances here are much smaller. We will see a refined diagnostic plot for outlier detection in the next step. 
@@ -265,6 +374,7 @@ with Linearity being the most important.
     plot(lm.youtube,which=4) # Cook's distance
     plot(lm.youtube,which=5) # Residuals vs leverage
     plot(lm.youtube,which=6) # Cook's distance vs leverage
+    plot(lm.youtube)
     ```
 
 ## Exercise 3: Transforming for a better model

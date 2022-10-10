@@ -42,7 +42,7 @@ In addition to the time index, it is important to notice that data points in a t
 
 The above concepts will be pretty easy to understand by exploring some real time series. So we will perform an exploratory data analysis on NZ housing data collected by the Reserve Bank of New Zealand(RBNZ) in Exercise 1. Interestingly, time can still be modelled by our linear model easily and the fitted linear model can be further used to make time series predictions. In Exercise 2 and 3, we will learn how to analyse time series via linear models.
 
-You first need to install `RBNZ` and `janitor` using the `Packages` menu in the bottom right. Just click the install button and type in `RBNZ`, then install. Or you can install the package with R command `install.packages()`. RStudio may have prompted you about installing them when you loaded this file.
+You first need to install `janitor` using the `Packages` menu in the bottom right. Just click the install button and type in `janitor`, then install. Or you can install the package with R command `install.packages()`. RStudio may have prompted you about installing them when you loaded this file.
 
 ## Exercise 1: Exploring NZ House Price
 
@@ -64,8 +64,13 @@ housing
 2. Let's make a scatter-line plot of house price index over time. You may customise it a bit to get a better appearance. 
 
 ```{r}
-housing |> ggplot(aes(x=date,y=index)) + geom_point() + geom_line() +
-  xlab('Time') + ylab('House Price Index') + ggtitle('Will Kiwi afford the house price?')
+housing |> 
+  ggplot(aes(x=date,y=index)) + 
+  geom_point() + 
+  geom_line() +
+  xlab('Time') + 
+  ylab('House Price Index') + 
+  ggtitle('Will Kiwi afford the house price?')
 ```
 
 
@@ -87,23 +92,28 @@ What will happen in the next decade with the shock of COVID-19? Will the house p
 **Answer**:
 
 ```{r}
-housing |> ggplot(aes(x=date,y=number)) + geom_point() + geom_line() +
-  xlab('Time') + ylab('Number of House Sales') + ggtitle('How many houses are sold in the past years?')
+housing |> ggplot(aes(x=date,y=number)) + 
+  geom_point() +  geom_line() +
+  xlab('Time') + ylab('Number of House Sales') + 
+  ggtitle('How many houses are sold in the past years?')
 ```
 
 No clear trend or seasonality can be observed here. But the pattern can be linked to HPI. When the house price is increasing, the number of house sales tends to be high. However, when the house price is fatten, the number of house sales tends to be low. One can also expect the internal correlation between successive numbers given the frequent short term movements in this time series (increasing or decreasing within several successive quarters).
 
 ```{r}
-housing |> ggplot(aes(x=date,y=m)) + geom_point() + geom_line() +
-  xlab('Time') + ylab('Total Value of Housing Stock') + ggtitle('Is housing market always prospering?')
+housing |> ggplot(aes(x=date,y=m)) + 
+  geom_point() + geom_line() +
+  xlab('Time') + ylab('Total Value of Housing Stock') + 
+  ggtitle('Is housing market always prospering?')
 ```
 
 Almost same features as we can see from HPI. Just notice that the total value of housing stock can be roughly calculated by the average house price times the total number of houses. The newly built houses make the depression caused by the Asian Financial crisis in 1997 and the 2011 Christchurch earthquake less obvious. 
 
 ```{r}
-housing |> ggplot(aes(x=date,y=real_m)) + geom_point() + geom_line() +
-  xlab('Time') + ylab('Residential Investment') + ggtitle('
-Residential Investment Opportunity!')
+housing |> ggplot(aes(x=date,y=real_m)) + 
+  geom_point() + geom_line() +
+  xlab('Time') + ylab('Residential Investment') + 
+  ggtitle('Residential Investment Opportunity!')
 ```
 
 The residential investment has a similar general pattern as the number of house sales as it contributes a certain portion to the whole housing market (another important contributor is the first home buyer.) However, the details of residential investment are different from the number of house sales. We see many zigzag segments in this time series especially in the first two decades. This may reflect the self-regulatory rationality of the investors who may not follow the trend of an over-heated housing market. *OK, I have to say that maybe the housing market in our country becomes a little crazy in the recent years.* **The last sentence is purely a personal comment.**   
@@ -192,8 +202,10 @@ We can find an additional row in `Coefficients:` as `I(time^2)`. There is the es
 Visualising this model can be done with `visreg()` in the usual way, but let's use the `broom` library instead to do it here:
 
 ```{r}
-augment(hpi.qm) |> ggplot(aes(x = time ,y=index)) + geom_point() + geom_line() +
-        geom_line(aes(y=.fitted),col='red') + xlab('Time Index') + ylab('House Price Index')
+augment(hpi.qm) |> ggplot(aes(x = time ,y=index)) + 
+  geom_point() + geom_line() +
+  geom_line(aes(y=.fitted),col='red') + 
+  xlab('Time Index') + ylab('House Price Index')
 ```
 
 You may add the confidence band or prediction band by following Exercise 1 in Lab C3. 
@@ -201,8 +213,11 @@ You may add the confidence band or prediction band by following Exercise 1 in La
 Sometimes people prefer making a plot in the calendar time rather than in the time index. This can be done easily by using `broom` as follows. Notice that we add the original data set `housing.ts` into `augment()` and change `x = time` to `x = date` in `ggplot()`. This is very handy in many cases especially you are fitting a linear model with transformation. 
 
 ```{r}
-augment(hpi.qm,housing.ts) |> ggplot(aes(x = date ,y=index)) + geom_point() + geom_line() +
-        geom_line(aes(y=.fitted),col='red') + xlab('Time') + ylab('House Price Index')
+augment(hpi.qm,housing.ts) |> 
+  ggplot(aes(x = date ,y=index)) + 
+  geom_point() + geom_line() +
+  geom_line(aes(y=.fitted),col='red') + 
+  xlab('Time') + ylab('House Price Index')
 ```
 
 *Comment on the goodness of fit of the quadratic trend model based on the visualisation.*
@@ -252,7 +267,7 @@ The linear trend model is certainly underestimating the HPI. The quadratic one m
 
 Besides the trend extracted by our linear models, another important feature of time series is the **seasonality** or **seasonal effects**. Many things exhibit seasonal patterns over different time periods (e.g. months or quarters) of a year. For example:
     
-  - Sales of ski equipment are very high during winter and almost nonexistent during other seasons.
+  - Sales of ski equipment are very high during winter and almost non-existent during other seasons.
 
   - Sales at department stores around Christmas holidays are much higher than during other times of the year.
 
@@ -273,8 +288,10 @@ How can we make use of the seasonal effects? We will start by exploring the data
 
 ```{r}
 consumption <- read_csv("https://www.massey.ac.nz/~jcmarsha/161122/data/consumption.csv")
+
 retail.trade.sales <- consumption |>
-  filter(date < ymd('2020-01-01'))
+  dplyr::filter(date < ymd('2020-01-01'))
+
 retail.trade.sales |>
   ggplot(aes(x=date,y=x_m)) + geom_point() + geom_line() + 
   xlab('Time') + ylab('Retail Trade Sales')
@@ -332,8 +349,10 @@ We further make a box plot to compare the residuals over different quarters.
 Here we add the data set `rts.ts` to `augment()` to make sure that we have the access to the calendar time and we can get the corresponding quarter by `quarter()` from `lubridate()`. 
 
 ```{r}
-augment(rts.lm, rts.ts) |> mutate(quarter=quarter(date)) |>
-  ggplot(aes(y=.resid,x=quarter)) + geom_boxplot(aes(group=quarter))
+augment(rts.lm, rts.ts) |> 
+  mutate(quarter=quarter(date)) |>
+  ggplot(aes(y=.resid,x=quarter)) + 
+  geom_boxplot(aes(group=quarter))
 ```
 
 Each box in the above boxplot characterises the residuals, i.e. the deviations from the trend line, at a specific quarter. The residuals here are a combination of true random errors and seasonal effects. 
@@ -345,7 +364,10 @@ How can we extract the information on seasonality? A simple idea is to estimate 
 
 **Answer**:
 ```{r}
-augment(rts.lm, rts.ts) |> mutate(quarter=quarter(date)) |> group_by(quarter) |> summarise(resid.mean=mean(.resid))
+augment(rts.lm, rts.ts) |> 
+  mutate(quarter=quarter(date)) |> 
+  group_by(quarter) |> 
+  summarise(resid.mean=mean(.resid))
 ```
 
 
@@ -373,8 +395,12 @@ More details on this strange issue after adding factor variables in the linear m
 
 Visualise our model with both linear trend and seasonal effects:
 ```{r}
-augment(rts.lm.q) |> ggplot(aes(x = time ,y=x_m)) + geom_point() + geom_line(alpha=0.3) +
-  geom_line(aes(y=.fitted),col='red') + xlab('Time Index') + ylab('Retail Trade Sales')
+augment(rts.lm.q) |> 
+  ggplot(aes(x = time ,y=x_m)) + 
+  geom_point() + 
+  geom_line(alpha=0.3) +
+  geom_line(aes(y=.fitted),col='red') + 
+  xlab('Time Index') + ylab('Retail Trade Sales')
 ```
 
 Now the fitted curve looks much more reasonable! *Do you think there is any room for further improvement?*
@@ -401,7 +427,8 @@ visreg(rts.lm.q)
 
 5. We can predict the sales in 2020 as follows
 ```{r}
-newtime <- data.frame(time=nrow(rts.ts)+(1:4),quarter=factor(1:4))
+newtime <- data.frame(time=nrow(rts.ts)+(1:4),
+                      quarter=factor(1:4))
 augment(rts.lm.q,newdata=newtime)
 ```
 By adding `newdata=newtime` in `augment()`, we can get the prediction immediately just like `predict()` and the results are organised well in a tibble. 
@@ -410,8 +437,10 @@ By adding `newdata=newtime` in `augment()`, we can get the prediction immediatel
 
 ```{r}
 rts.2020 <- consumption |>
-  filter(date >= ymd('2020-01-01') & date <= ymd('2021-01-01') ) |> 
+  dplyr::filter(date >= ymd('2020-01-01') & 
+                date <= ymd('2021-01-01') ) |> 
   cbind(augment(rts.lm.q,newdata=newtime)) 
+
 rts.2020
 rts.2020 |> summarise(mse=mean((x_m-.fitted)^2))
 ```
@@ -425,9 +454,12 @@ The predictions are not really good as the sales have been underestimated consis
 
 **Answer**:
 ```{r}
-rts.lm.q.log <- lm(log(x_m)~time+quarter,data=rts.ts.q)
+rts.lm.q.log <- lm(log(x_m) ~ time + quarter, data=rts.ts.q)
+
 summary(rts.lm.q.log)
-augment(rts.lm.q.log,newdata=newtime) |> mutate(.pred=exp(.fitted))
+
+augment(rts.lm.q.log, newdata=newtime) |> 
+  mutate(.pred=exp(.fitted))
 ```
 
 Predictions are much better! You can check residuals and visualisation accordingly. 
